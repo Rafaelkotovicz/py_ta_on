@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SmartGate - Logs</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><span class="dot"></span> SmartGate</div>
+    <nav class="nav">
+      <a href="/">Dashboard</a>
+      <a href="/logs" class="active">Logs</a>
+      <a href="/solicitacoes">Solicitacoes</a>
+    </nav>
+    <div class="foot">ESP32 &middot; MicroPython</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <h1>Logs de acesso</h1>
+      <div class="pill"><span class="live"></span> polling 4s</div>
+    </div>
+
+    <div class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th>UID</th><th>Data/Hora</th><th>Metodo</th>
+            <th>Nivel</th><th>Resultado</th>
+          </tr>
+        </thead>
+        <tbody id="logs-body">
+          <tr><td colspan="5" class="empty">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

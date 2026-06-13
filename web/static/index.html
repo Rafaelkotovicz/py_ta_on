@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SmartGate - Dashboard</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><span class="dot"></span> SmartGate</div>
+    <nav class="nav">
+      <a href="/" class="active">Dashboard</a>
+      <a href="/logs">Logs</a>
+      <a href="/solicitacoes">Solicitacoes</a>
+    </nav>
+    <div class="foot">ESP32 &middot; MicroPython</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <h1>Dashboard</h1>
+      <div class="pill"><span class="live"></span> atualizando</div>
+    </div>
+
+    <section class="cards">
+      <div class="card accent">
+        <div class="label">Total de usuarios</div>
+        <div class="value" id="stat-usuarios">-</div>
+      </div>
+      <div class="card">
+        <div class="label">Total de acessos</div>
+        <div class="value" id="stat-acessos">-</div>
+      </div>
+      <div class="card bad">
+        <div class="label">Acessos negados</div>
+        <div class="value" id="stat-negados">-</div>
+      </div>
+      <div class="card warn">
+        <div class="label">Solicitacoes pendentes</div>
+        <div class="value" id="stat-pendentes">-</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
