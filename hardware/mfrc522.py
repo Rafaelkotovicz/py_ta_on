@@ -19,10 +19,22 @@ class MFRC522:
     REQIDL = 0x26
     REQALL = 0x52
 
-    def __init__(self, sck, mosi, miso, rst, cs, spi_id=2, baudrate=1000000):
+    def __init__(self, sck, mosi, miso=None, rst=None, cs=None,
+                 spi_id=2, baudrate=1000000):
+        # Estilo wendlers: MFRC522(spi, cs, rst) — SPI ja criado externamente
+        if isinstance(sck, SPI):
+            self.spi = sck
+            self.rst = Pin(mosi, Pin.OUT)
+            self.cs = Pin(miso, Pin.OUT)
+            self.rst.value(0)
+            self.cs.value(1)
+            self.rst.value(1)
+            self.init()
+            return
+
         self.sck = Pin(sck, Pin.OUT)
         self.mosi = Pin(mosi, Pin.OUT)
-        self.miso = Pin(miso)
+        self.miso = Pin(miso, Pin.IN)
         self.rst = Pin(rst, Pin.OUT)
         self.cs = Pin(cs, Pin.OUT)
 
@@ -45,7 +57,7 @@ class MFRC522:
     def _rreg(self, reg):
         self.cs.value(0)
         self.spi.write(b"%c" % int(0xFF & (((reg << 1) & 0x7E) | 0x80)))
-        val = self.spi.read(1)
+        val = self.spi.read(1, 0xFF)
         self.cs.value(1)
         return val[0]
 

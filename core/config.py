@@ -28,7 +28,7 @@ class Config:
     PIN_MISO = 19
     PIN_RST = 22
     PIN_SDA = 5         # CS / SS do MFRC522 (conforme circuito Wokwi)
-    SPI_BAUDRATE = 1000000
+    SPI_BAUDRATE = 1000000  # 1 MHz (estavel no Wokwi; ate ~2.5 MHz costuma funcionar)
 
     # ---------------- Rele / Solenoide --------------------
     PIN_RELAY = 15
