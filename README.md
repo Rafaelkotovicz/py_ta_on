@@ -178,7 +178,7 @@ Evento (NFC ou Senha)
 ## Estrutura de pastas
 
 ```
-paitus/
+.
 ├── main.py                      # Composition Root + event loop
 ├── core/
 │   ├── config.py                # pinos, tempos, wifi, paths
@@ -260,8 +260,8 @@ mpremote connect COM3 repl
 | SPI MOSI (MFRC522)  | 23   |
 | SPI MISO (MFRC522)  | 19   |
 | MFRC522 RST         | 22   |
-| MFRC522 SDA/CS      | 21   |
-| Rele (IN)           | 25   |
+| MFRC522 SDA/CS      | 5    |
+| Rele (IN)           | 15   |
 | Botao A (`0`)       | 32   |
 | Botao B (`1`)       | 33   |
 
@@ -269,7 +269,7 @@ mpremote connect COM3 repl
 
 | MFRC522 | ESP32       |
 |---------|-------------|
-| SDA/SS  | GPIO 21     |
+| SDA/SS  | GPIO 5      |
 | SCK     | GPIO 18     |
 | MOSI    | GPIO 23     |
 | MISO    | GPIO 19     |
@@ -281,7 +281,7 @@ mpremote connect COM3 repl
 
 | Rele | ESP32 |
 |------|-------|
-| IN   | GPIO 25 |
+| IN   | GPIO 15 |
 | VCC  | 5V (ou 3V3 conforme o modulo) |
 | GND  | GND |
 
@@ -340,4 +340,7 @@ suas tags — o console imprime o UID lido).
 - **Driver MFRC522 reduzido**: apenas request/anticoll (somente o UID), poupando
   flash e RAM.
 - **Polling no front-end** (sem WebSocket): conexoes curtas com `Connection: close`.
-```
+
+> Pinagem e baudrate SPI: valores oficiais em `core/config.py` (`PIN_*`, `SPI_BAUDRATE`).
+> Uso do MFRC522: `NFCReader(...)` em `main.py` ou `MFRC522(18, 23, 19, 22, 5)` com pinos;
+> alternativamente `MFRC522(spi, cs, rst)` se o barramento SPI ja existir.

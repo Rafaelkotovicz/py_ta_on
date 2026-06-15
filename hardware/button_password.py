@@ -31,6 +31,8 @@ class PasswordController:
 
         self._seq = ""
         self._last_press = 0
+        self._last_edge_a = 0
+        self._last_edge_b = 0
         self._last_state_a = self._raw(self._btn_a)
         self._last_state_b = self._raw(self._btn_b)
 
@@ -66,10 +68,12 @@ class PasswordController:
         b = self._raw(self._btn_b)
 
         if a and not self._last_state_a:
-            if time.ticks_diff(agora, self._last_press) > self._debounce:
+            if time.ticks_diff(agora, self._last_edge_a) > self._debounce:
+                self._last_edge_a = agora
                 self._append("0")
         if b and not self._last_state_b:
-            if time.ticks_diff(agora, self._last_press) > self._debounce:
+            if time.ticks_diff(agora, self._last_edge_b) > self._debounce:
+                self._last_edge_b = agora
                 self._append("1")
 
         self._last_state_a = a
