@@ -49,6 +49,15 @@ class VisitorStrategy(AccessStrategy):
         return ResultadoAcesso.PENDENTE
 
 
+class PinRequiredStrategy(AccessStrategy):
+    """Exige tag NFC + senha nos botoes (sessao aberta pelo AccessService)."""
+
+    def avaliar(self, usuario, offset_hours=0):
+        if not usuario.senha:
+            return ResultadoAcesso.NEGADO
+        return ResultadoAcesso.AGUARDANDO_SENHA
+
+
 def build_strategies(tr_inicio=12, tr_fim=18):
     """Fabrica o mapa nivel -> estrategia (instancias unicas reutilizaveis)."""
     return {
@@ -56,4 +65,5 @@ def build_strategies(tr_inicio=12, tr_fim=18):
         NivelAcesso.USER: UserStrategy(),
         NivelAcesso.TIME_RESTRICTED: TimeRestrictedStrategy(tr_inicio, tr_fim),
         NivelAcesso.VISITOR: VisitorStrategy(),
+        NivelAcesso.PIN_REQUIRED: PinRequiredStrategy(),
     }

@@ -38,6 +38,7 @@ class WebServer:
         await asyncio.start_server(self._handle, self._host, self._port)
 
     async def _handle(self, reader, writer):
+        path = "?"
         try:
             req_line = await reader.readline()
             if not req_line:
@@ -63,9 +64,11 @@ class WebServer:
             if content_length > 0:
                 body = await _read_exact(reader, content_length)
 
+            print("HTTP", method, path)
             resp = await self._router.resolve(method, path, body)
             await self._send(writer, resp)
-        except Exception:
+        except Exception as e:
+            print("HTTP erro", path, e)
             try:
                 await self._send(writer, {
                     "kind": "text",
@@ -93,8 +96,9 @@ class WebServer:
             body = body.encode()
         status = resp.get("status", "200 OK")
         ctype = resp.get("ctype", "text/plain")
-        header = ("HTTP/1.0 %s\r\nContent-Type: %s\r\n"
-                  "Content-Length: %d\r\nConnection: close\r\n\r\n"
+        header = ("HTTP/1.1 %s\r\nContent-Type: %s\r\n"
+                  "Content-Length: %d\r\nConnection: close\r\n"
+                  "Cache-Control: no-cache\r\n\r\n"
                   % (status, ctype, len(body)))
         writer.write(header.encode())
         writer.write(body)
@@ -111,16 +115,14 @@ class WebServer:
                 "body": "Arquivo nao encontrado",
             })
             return
-        header = ("HTTP/1.0 200 OK\r\nContent-Type: %s\r\n"
-                  "Connection: close\r\n\r\n" % ctype)
-        writer.write(header.encode())
-        await writer.drain()
         try:
-            while True:
-                chunk = f.read(CHUNK)
-                if not chunk:
-                    break
-                writer.write(chunk)
-                await writer.drain()
+            data = f.read()
+            size = len(data)
         finally:
             f.close()
+        header = ("HTTP/1.1 200 OK\r\nContent-Type: %s\r\n"
+                  "Content-Length: %d\r\nConnection: close\r\n\r\n"
+                  % (ctype, size))
+        writer.write(header.encode())
+        writer.write(data)
+        await writer.drain()

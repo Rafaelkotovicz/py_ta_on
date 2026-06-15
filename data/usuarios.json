@@ -1,6 +1,5 @@
 [
-  {"uid": "a1b2c3d4", "nivel_acesso": "ADMIN", "ativo": true, "nome": "Administrador"},
-  {"uid": "11223344", "nivel_acesso": "USER", "ativo": true, "nome": "Funcionario"},
-  {"uid": "55667788", "nivel_acesso": "TIME_RESTRICTED", "ativo": true, "nome": "Terceirizado"},
-  {"uid": "99aabbcc", "nivel_acesso": "VISITOR", "ativo": true, "nome": "Visitante"}
+  {"uid": "eb4f971b", "nivel_acesso": "ADMIN", "ativo": true, "nome": "Acesso total"},
+  {"uid": "6991017f", "nivel_acesso": "TIME_RESTRICTED", "ativo": true, "nome": "Horario comercial"},
+  {"uid": "88045530", "nivel_acesso": "PIN_REQUIRED", "ativo": true, "nome": "Tag + senha", "senha": "0101"}
 ]

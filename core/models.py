@@ -18,21 +18,26 @@ from core.enums import (
 class Usuario:
     """Usuario identificado por UID da tag NFC."""
 
-    __slots__ = ("uid", "nivel_acesso", "ativo", "nome")
+    __slots__ = ("uid", "nivel_acesso", "ativo", "nome", "senha")
 
-    def __init__(self, uid, nivel_acesso=NivelAcesso.USER, ativo=True, nome=""):
+    def __init__(self, uid, nivel_acesso=NivelAcesso.USER, ativo=True,
+                 nome="", senha=""):
         self.uid = uid
         self.nivel_acesso = nivel_acesso
         self.ativo = ativo
         self.nome = nome
+        self.senha = senha
 
     def to_dict(self):
-        return {
+        d = {
             "uid": self.uid,
             "nivel_acesso": self.nivel_acesso,
             "ativo": self.ativo,
             "nome": self.nome,
         }
+        if self.senha:
+            d["senha"] = self.senha
+        return d
 
     @staticmethod
     def from_dict(d):
@@ -41,6 +46,7 @@ class Usuario:
             d.get("nivel_acesso", NivelAcesso.USER),
             d.get("ativo", True),
             d.get("nome", ""),
+            d.get("senha", ""),
         )
 
 

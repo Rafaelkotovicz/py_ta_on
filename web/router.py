@@ -61,6 +61,7 @@ class Router:
         return {
             "usuarios": self._users.count(),
             "acessos": ls["total"],
+            "liberados": ls["liberados"],
             "negados": ls["negados"],
             "pendentes": self._requests_repo.count_pending(),
         }
@@ -70,6 +71,16 @@ class Router:
         q = path.find("?")
         if q >= 0:
             path = path[:q]
+
+        # iOS/Android: sem isso o celular pode usar 4G e a API falha
+        if path in ("/hotspot-detect.html", "/library/test/success.html",
+                    "/generate_204", "/connecttest.txt", "/success.txt"):
+            return {
+                "kind": "text",
+                "status": "200 OK",
+                "ctype": "text/html",
+                "body": "<html><body>OK</body></html>",
+            }
 
         if method == "GET":
             if path == "/" or path == "/index.html":
@@ -88,6 +99,8 @@ class Router:
                 return self._json(self._logs.recent(50))
             if path == "/api/solicitacoes":
                 return self._json(self._request_service.listar_pendentes())
+            if path == "/api/ping":
+                return self._json({"ok": True})
 
         elif method == "POST":
             if path == "/api/solicitacoes/aprovar":

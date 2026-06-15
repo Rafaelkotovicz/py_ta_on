@@ -1,6 +1,5 @@
 // SmartGate - JS leve, sem frameworks.
-// Estrategia: polling periodico via fetch (sem WebSocket, para poupar
-// RAM do ESP32). Cada pagina ativa apenas o loop de que precisa.
+// Polling via fetch; erros visiveis para depuracao no celular.
 
 const POLL_MS = 4000;
 
@@ -10,12 +9,27 @@ function badge(resultado) {
   const r = (resultado || "").toUpperCase();
   if (r === "LIBERADO" || r === "APROVADA") return '<span class="badge ok">' + r + "</span>";
   if (r === "NEGADO" || r === "NEGADA") return '<span class="badge bad">' + r + "</span>";
+  if (r === "AGUARDANDO_SENHA") return '<span class="badge warn">AGUARD. SENHA</span>';
   return '<span class="badge warn">' + r + "</span>";
 }
 
+function apiUrl(path) {
+  return path + "?_=" + Date.now();
+}
+
 async function getJSON(url) {
-  const res = await fetch(url);
+  const res = await fetch(apiUrl(url), { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error("HTTP " + res.status);
+  }
   return res.json();
+}
+
+function showApiError(msg) {
+  const pill = document.querySelector(".pill");
+  if (pill) {
+    pill.innerHTML = '<span class="live" style="background:#f44"></span> ' + msg;
+  }
 }
 
 // ---------------- Dashboard ----------------
@@ -26,14 +40,17 @@ async function loadStats() {
     el("stat-acessos").textContent = s.acessos;
     el("stat-negados").textContent = s.negados;
     el("stat-pendentes").textContent = s.pendentes;
-  } catch (e) {}
+  } catch (e) {
+    showApiError("API offline");
+  }
 }
 
 // ---------------- Logs ----------------
 async function loadLogs() {
+  const body = el("logs-body");
+  if (!body) return;
   try {
     const logs = await getJSON("/api/logs");
-    const body = el("logs-body");
     if (!logs.length) {
       body.innerHTML = '<tr><td colspan="5" class="empty">Nenhum log ainda</td></tr>';
       return;
@@ -43,14 +60,18 @@ async function loadLogs() {
         "</td><td>" + (l.metodo || "-") + "</td><td>" + (l.nivel_acesso || "-") +
         "</td><td>" + badge(l.resultado) + "</td></tr>";
     }).join("");
-  } catch (e) {}
+  } catch (e) {
+    body.innerHTML = '<tr><td colspan="5" class="empty">Erro ao carregar API</td></tr>';
+    showApiError("API offline");
+  }
 }
 
 // ---------------- Solicitacoes ----------------
 async function loadSolicitacoes() {
+  const body = el("sol-body");
+  if (!body) return;
   try {
     const items = await getJSON("/api/solicitacoes");
-    const body = el("sol-body");
     if (!items.length) {
       body.innerHTML = '<tr><td colspan="5" class="empty">Nenhuma solicitacao pendente</td></tr>';
       return;
@@ -60,18 +81,22 @@ async function loadSolicitacoes() {
         (s.data_hora || "-") + "</td><td>" + badge(s.status) +
         '</td><td><button class="btn ok" onclick="decidir(' + s.id +
         ',true)">Aprovar</button> <button class="btn bad" onclick="decidir(' +
-        s.id + ',false)">Negar</button></td></tr>";
+        s.id + ',false)">Negar</button></td></tr>';
     }).join("");
-  } catch (e) {}
+  } catch (e) {
+    body.innerHTML = '<tr><td colspan="5" class="empty">Erro ao carregar API</td></tr>';
+    showApiError("API offline");
+  }
 }
 
 async function decidir(id, aprovar) {
   const url = aprovar ? "/api/solicitacoes/aprovar" : "/api/solicitacoes/negar";
   try {
-    await fetch(url, {
+    await fetch(apiUrl(url), {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: "id=" + id,
+      cache: "no-store",
     });
   } catch (e) {}
   loadSolicitacoes();

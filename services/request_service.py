@@ -4,6 +4,8 @@ Encapsula as regras de aprovar/negar, mantendo o Router (web) livre de
 logica de negocio.
 """
 
+import uasyncio as asyncio
+
 from core.enums import (
     StatusSolicitacao,
     ResultadoAcesso,
@@ -34,10 +36,11 @@ class RequestService:
         uid = self._requests.update_status(sid, StatusSolicitacao.APROVADA)
         if uid is None:
             return False
+        await self._relay.pulso_sync(self._cfg.RELAY_OPEN_TIME)
+        await asyncio.sleep_ms(150)
         self._logs.add(Log(uid, now_str(self._cfg.TIMEZONE_OFFSET),
                            MetodoAcesso.NFC, NivelAcesso.VISITOR,
                            ResultadoAcesso.LIBERADO))
-        await self._relay.liberar_temporariamente()
         return True
 
     def negar(self, sid):

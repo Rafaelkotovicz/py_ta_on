@@ -8,6 +8,7 @@ usa somente o UID.
 """
 
 from machine import Pin, SPI
+import time
 
 
 class MFRC522:
@@ -21,45 +22,46 @@ class MFRC522:
 
     def __init__(self, sck, mosi, miso=None, rst=None, cs=None,
                  spi_id=2, baudrate=1000000):
-        # Estilo wendlers: MFRC522(spi, cs, rst) — SPI ja criado externamente
-        if isinstance(sck, SPI):
+        # MFRC522(spi, cs, rst) — SPI/SoftSPI ja criado externamente
+        if not isinstance(sck, int):
             self.spi = sck
-            self.rst = Pin(mosi, Pin.OUT)
-            self.cs = Pin(miso, Pin.OUT)
-            self.rst.value(0)
-            self.cs.value(1)
-            self.rst.value(1)
+            self.cs = Pin(mosi, Pin.OUT)
+            self.rst = Pin(miso, Pin.OUT)
+            self._reset_pins()
             self.init()
             return
 
-        self.sck = Pin(sck, Pin.OUT)
-        self.mosi = Pin(mosi, Pin.OUT)
-        self.miso = Pin(miso, Pin.IN)
         self.rst = Pin(rst, Pin.OUT)
         self.cs = Pin(cs, Pin.OUT)
+        self._reset_pins()
+        try:
+            SPI(spi_id).deinit()
+        except OSError:
+            pass
+        self.spi = SPI(spi_id, baudrate=baudrate, polarity=0, phase=0)
+        self.spi.init()
+        self.init()
 
+    def _reset_pins(self):
+        """Pulso de reset no MFRC522 (necessario em hardware real)."""
         self.rst.value(0)
         self.cs.value(1)
-
-        self.spi = SPI(spi_id, baudrate=baudrate, polarity=0, phase=0,
-                       sck=self.sck, mosi=self.mosi, miso=self.miso)
-
+        time.sleep_ms(50)
         self.rst.value(1)
-        self.init()
+        time.sleep_ms(50)
 
     # ----------------- acesso de baixo nivel -----------------
     def _wreg(self, reg, val):
         self.cs.value(0)
-        self.spi.write(b"%c" % int(0xFF & ((reg << 1) & 0x7E)))
-        self.spi.write(b"%c" % int(0xFF & val))
+        self.spi.write(bytes([0xFF & ((reg << 1) & 0x7E), 0xFF & val]))
         self.cs.value(1)
 
     def _rreg(self, reg):
         self.cs.value(0)
-        self.spi.write(b"%c" % int(0xFF & (((reg << 1) & 0x7E) | 0x80)))
-        val = self.spi.read(1, 0xFF)
+        buf = bytearray([0xFF & (((reg << 1) & 0x7E) | 0x80), 0])
+        self.spi.write_readinto(buf, buf)
         self.cs.value(1)
-        return val[0]
+        return buf[1]
 
     def _sflags(self, reg, mask):
         self._wreg(reg, self._rreg(reg) | mask)

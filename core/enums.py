@@ -10,6 +10,7 @@ class NivelAcesso:
     USER = "USER"
     TIME_RESTRICTED = "TIME_RESTRICTED"
     VISITOR = "VISITOR"
+    PIN_REQUIRED = "PIN_REQUIRED"
 
 
 class MetodoAcesso:
@@ -21,6 +22,7 @@ class ResultadoAcesso:
     LIBERADO = "LIBERADO"
     NEGADO = "NEGADO"
     PENDENTE = "PENDENTE"
+    AGUARDANDO_SENHA = "AGUARDANDO_SENHA"
 
 
 class StatusSolicitacao:
